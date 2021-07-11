@@ -1,0 +1,11 @@
+language: generic
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t oddsha/docker-react -f Dockerfile.dev .
+
+
+script:
+  - docker run -e CI=true oddsha/docker-react npm run test
