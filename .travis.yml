@@ -10,7 +10,6 @@ before_install:
 script:
   - docker run -e CI=true oddsha/docker-react npm run test
 
-
 deploy:
   provider: elasticbeanstalk
   region: "us-east-2"
