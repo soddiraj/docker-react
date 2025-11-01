@@ -25,6 +25,14 @@ stages:
         Dockerfile: '**/Dockerfile'
         tags: |
           $(imageName):$(Build.BuildId)
+    - script: docker save $(imageName):$(Build.BuildId) -o image.tar
+      displayName: Save Docker image
+
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: 'image.tar'
+        artifact: 'docker-image'
+    
     # - script: |
     #     echo "Running the built image..."
     #     docker run --rm $(imageName):$(Build.BuildId)
@@ -40,7 +48,14 @@ stages:
   jobs:
   - job: Push
     steps:
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: 'docker-image'
+        path: '.'
+
     - script: |
+        docker load -i image.tar
+        
         echo "Logging in to JFrog Artifactory..."
         echo "$(artifactoryPassword)" | docker login $(artifactoryUrl) -u "$(artifactoryUser)" --password-stdin
 
