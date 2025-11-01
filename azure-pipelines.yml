@@ -27,6 +27,10 @@ stages:
           $(imageName):$(Build.BuildId)
     - script: docker save $(imageName):$(Build.BuildId) -o image.tar
       displayName: Save Docker image
+    - task: CopyFiles@2
+      inputs:
+        Contents: '**'
+        TargetFolder: '$(build.artifactstagingdirectory)'
 
     - task: PublishPipelineArtifact@1
       inputs:
