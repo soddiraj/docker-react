@@ -1,13 +1,18 @@
-FROM node:alpine
-WORKDIR '/app'
-COPY package.json .
-RUN npm install
+# Use an official lightweight Node.js image
+FROM node:20-alpine
+
+# Set the working directory
+WORKDIR /app
+
+# Copy all files from your repo into the container
 COPY . .
-RUN npm run build
 
+# Simple build step (just a placeholder)
+RUN echo "Building the project..." && \
+    echo "Hello from Docker build!" > build.txt
 
-FROM nginx
-EXPOSE 80
-COPY --from=0 /app/build /usr/share/nginx/html
+# Expose a test port (not necessary, but good practice)
+EXPOSE 8080
 
-
+# Run a simple command when container starts
+CMD ["cat", "build.txt"]
