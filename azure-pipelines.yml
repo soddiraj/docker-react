@@ -13,10 +13,10 @@ stages:
 # -----------------------------
 # Stage 1: Build Docker image
 # -----------------------------
-- stage: Build
-  displayName: Build Docker Image
+- stage: BuildAndRun
+  displayName: Build and Run Docker Image
   jobs:
-  - job: Build
+  - job: BuildRun
     steps:
     - task: Docker@2
       displayName: Build Docker image
@@ -25,27 +25,18 @@ stages:
         Dockerfile: '**/Dockerfile'
         tags: |
           $(imageName):$(Build.BuildId)
-
-# -----------------------------
-# Stage 2: Run & Test the Image
-# -----------------------------
-- stage: Test
-  displayName: Run Docker Image and Print Output
-  dependsOn: Build
-  jobs:
-  - job: Test
-    steps:
     - script: |
-        echo "Running image locally..."
+        echo "Running the built image..."
         docker run --rm $(imageName):$(Build.BuildId)
-      displayName: Run container and print output
+      displayName: Run container and print output      
+
 
 # -----------------------------
-# Stage 3: Publish to Artifactory
+# Stage 2: Publish to Artifactory
 # -----------------------------
 - stage: Publish
   displayName: Push Docker Image to JFrog Artifactory
-  dependsOn: Test
+  dependsOn: BuildAndRun
   jobs:
   - job: Push
     steps:
