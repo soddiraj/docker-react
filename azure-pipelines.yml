@@ -25,10 +25,10 @@ stages:
         Dockerfile: '**/Dockerfile'
         tags: |
           $(imageName):$(Build.BuildId)
-    - script: |
-        echo "Running the built image..."
-        docker run --rm $(imageName):$(Build.BuildId)
-      displayName: Run container and print output      
+    # - script: |
+    #     echo "Running the built image..."
+    #     docker run --rm $(imageName):$(Build.BuildId)
+    #   displayName: Run container and print output      
 
 
 # -----------------------------
