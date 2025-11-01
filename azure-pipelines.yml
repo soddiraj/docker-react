@@ -6,7 +6,7 @@ pool:
 
 variables:
   imageName: sample-pipeline-demo
-  artifactoryUrl: 'https://soddiraju.jfrog.io'        # e.g. myrepo.jfrog.io
+  artifactoryUrl: 'soddiraju.jfrog.io'        # e.g. myrepo.jfrog.io
   artifactoryRepo: 'devops9-docker'     # e.g. docker-local
   
 stages:
