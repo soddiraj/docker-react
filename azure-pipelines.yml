@@ -25,7 +25,7 @@ stages:
         Dockerfile: '**/Dockerfile'
         repository: '$(imageName)'
         tags: |
-          $(imageName):$(Build.BuildId)
+          $(Build.BuildId)
 
     - script: docker images
       displayName: List local images 
