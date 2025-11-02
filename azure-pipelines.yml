@@ -13,26 +13,29 @@ stages:
 # -----------------------------
 # Stage 1: Build Docker image
 # -----------------------------
-- stage: BuildAndRun
-  displayName: Build and Run Docker Image
+- stage: Build
+  displayName: Build Docker Image
   jobs:
-  - job: BuildRun
+  - job: Build
     steps:
     - task: Docker@2
       displayName: Build Docker image
       inputs:
         command: build
         Dockerfile: '**/Dockerfile'
+        repository: '$(imageName)'
         tags: |
           $(imageName):$(Build.BuildId)
+
+    - script: docker images
+      displayName: List local images 
+
     - script: docker save $(imageName):$(Build.BuildId) -o image.tar
       displayName: Save Docker image
-    - task: CopyFiles@2
-      inputs:
-        Contents: '**'
-        TargetFolder: '$(build.artifactstagingdirectory)'
+    
 
     - task: PublishPipelineArtifact@1
+      displayName: Publish Docker image artifact
       inputs:
         targetPath: 'image.tar'
         artifact: 'docker-image'
@@ -42,13 +45,33 @@ stages:
     #     docker run --rm $(imageName):$(Build.BuildId)
     #   displayName: Run container and print output      
 
+# --------------------------------------------------
+# Stage 2: Run the Image and Print Output
+# --------------------------------------------------
+- stage: Test
+  displayName: Run and Verify Docker Image
+  dependsOn: Build
+  jobs:
+  - job: RunImage
+    steps:
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: 'docker-image'
+        path: '.'
+
+    - script: |
+        echo "Loading saved Docker image..."
+        docker load -i image.tar
+        echo "Running container..."
+        docker run --rm $(imageName):$(Build.BuildId)
+      displayName: Run Docker container and print output
 
 # -----------------------------
-# Stage 2: Publish to Artifactory
+# Stage 3: Publish to Artifactory
 # -----------------------------
 - stage: Publish
   displayName: Push Docker Image to JFrog Artifactory
-  dependsOn: BuildAndRun
+  dependsOn: Test
   jobs:
   - job: Push
     steps:
@@ -69,3 +92,6 @@ stages:
         echo "Pushing image to Artifactory..."
         docker push $(artifactoryUrl)/$(artifactoryRepo)/$(imageName):$(Build.BuildId)
       displayName: Push image to Artifactory
+
+    - script: docker system prune -af
+      displayName: Cleanup local Docker cache
